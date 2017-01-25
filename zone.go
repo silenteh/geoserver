@@ -139,10 +139,16 @@ func getExternalIP(provider CloudProvider, url string) string {
 	resp, err := zoneHttpClient.Do(req)
 	if err == nil {
 		defer resp.Body.Close()
-		bodyBytes, err = ioutil.ReadAll(resp.Body)
-		if err == nil {
-			return string(bodyBytes)
+
+		if resp.StatusCode == 200 {
+			bodyBytes, err = ioutil.ReadAll(resp.Body)
+			if err == nil {
+				return string(bodyBytes)
+			}
+		} else {
+			log.Println("VM External IP: got", resp.StatusCode, "status code.")
 		}
+
 	}
 
 	log.Println("Failed to get external IP", url, err)
@@ -177,11 +183,16 @@ func getIPCoordinates(ip string) *coordinates {
 	} else {
 		// Parse the response
 		defer resp.Body.Close()
-		enc := json.NewDecoder(resp.Body)
-		if err := enc.Decode(coord); err != nil {
-			log.Println("Failed to parse external GEO ip json response", ipAddressUrl, err)
-			return coord
+		if resp.StatusCode == 200 {
+			enc := json.NewDecoder(resp.Body)
+			if err := enc.Decode(coord); err != nil {
+				log.Println("Failed to parse external GEO ip json response", ipAddressUrl, err)
+				return coord
+			}
+		} else {
+			log.Println("IP Coordinates service: got", resp.StatusCode, "status code")
 		}
+
 		return coord
 	}
 
