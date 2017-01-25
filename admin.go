@@ -32,7 +32,7 @@ func (s *adminPanel) ping(z *zone) error {
 
 		if len(serialized) > 0 {
 			log.Printf("Zone %s stored correctly\n", serialized)
-			return b.Put([]byte(z.IpAddress.ip), serialized)
+			return b.Put([]byte(z.IpAddress.Ip), serialized)
 		}
 
 		return nil
