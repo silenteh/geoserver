@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"sync"
+	"time"
 )
 
 // Defines the currently supported cloud providers
@@ -100,14 +101,22 @@ func (api *api) Start() {
 }
 
 func (api *api) adminHandlerFunc(w http.ResponseWriter, r *http.Request) {
-	var vms *[]*zone
-	if err := api.admin.getAll(vms); err != nil {
+	var vms []*zone
+	if err := api.admin.getAll(&vms); err != nil {
 		log.Println("Error getting VMs", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
-	data, _ := json.Marshal(vms)
+	finalList := vms
+	now := time.Now().UTC().Add(-1 * time.Minute)
+	for index, vm := range vms {
+		if !vm.Ready || now.Before(vm.Timestamp) {
+			finalList = remove(vms, index)
+		}
+	}
+
+	data, _ := json.Marshal(&finalList)
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(data)
@@ -231,4 +240,8 @@ func (api *api) writeReadyness(w http.ResponseWriter) {
 
 	mutex.Unlock()
 
+}
+
+func remove(slice []*zone, s int) []*zone {
+	return append(slice[:s], slice[s+1:]...)
 }
