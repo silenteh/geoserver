@@ -85,12 +85,11 @@ func (h *heartbit) ping(url string) {
 
 		resp, err := h.client.Do(req)
 		if err == nil {
-			//
+			defer resp.Body.Close()
 			log.Println("Response Status:", url, resp.Status)
 		} else {
 			log.Println("Could not send heartbit", err)
 		}
-		defer resp.Body.Close()
 		return
 	}
 	log.Println("Error serialize VM information to JSON")
