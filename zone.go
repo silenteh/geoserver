@@ -60,7 +60,8 @@ func getVMData(provider CloudProvider, clientIp string) *zone {
 	if clientIp != "" {
 		// split /host /port
 		host, _, _ := net.SplitHostPort(clientIp)
-		z.ClientIpAddress = getIPCoordinates(host)
+		coord := getIPCoordinates(host)
+		z.ClientIpAddress = &coord
 		log.Printf("Got client IP coordinates: %s\n", z.ClientIpAddress)
 	}
 
@@ -108,7 +109,8 @@ func getVMInfo(provider CloudProvider, z *zone) {
 	log.Println("Got external VM ip address", ip)
 	if ip != "" {
 		// Resolves the geo location info
-		z.IpAddress = getIPCoordinates(ip)
+		coord := getIPCoordinates(ip)
+		z.IpAddress = &coord
 		log.Printf("Got external VM ip address GEO: %s\n", z.IpAddress)
 	}
 
@@ -158,12 +160,13 @@ func getExternalIP(provider CloudProvider, url string) string {
 
 // Calls the geo ip web service to resolve the geolocation info
 // http://ipinfo.io/developers/jsonp-requests
-func getIPCoordinates(ip string) *coordinates {
+func getIPCoordinates(ip string) coordinates {
 
-	coord := new(coordinates)
+	var coord coordinates
 
 	// format the URL
 	ipAddressUrl := fmt.Sprintf(geoServiceExternalIPUrl, ip)
+	log.Println("Calling GEO IP Services", ipAddressUrl)
 
 	// create request
 	req, err := http.NewRequest("GET", ipAddressUrl, nil)
@@ -185,14 +188,14 @@ func getIPCoordinates(ip string) *coordinates {
 		defer resp.Body.Close()
 		if resp.StatusCode == 200 {
 			enc := json.NewDecoder(resp.Body)
-			if err := enc.Decode(coord); err != nil {
+			if err := enc.Decode(&coord); err != nil {
 				log.Println("Failed to parse external GEO ip json response", ipAddressUrl, err)
 				return coord
 			}
 		} else {
 			log.Println("IP Coordinates service: got", resp.StatusCode, "status code")
 		}
-
+		log.Printf("Geo IP response: %s\n", coord)
 		return coord
 	}
 
