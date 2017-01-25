@@ -111,7 +111,7 @@ func (api *api) adminHandlerFunc(w http.ResponseWriter, r *http.Request) {
 	finalList := vms
 	now := time.Now().UTC().Add(-1 * time.Minute)
 	for index, vm := range vms {
-		if !vm.Ready || now.After(vm.Timestamp) {
+		if now.After(vm.Timestamp) {
 			finalList = remove(vms, index)
 		}
 	}
