@@ -121,6 +121,7 @@ func (api *api) pingHandlerFunc(w http.ResponseWriter, r *http.Request) {
 	err := decoder.Decode(z)
 
 	if err != nil {
+		log.Println("Could not deserialize zone", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
