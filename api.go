@@ -54,7 +54,9 @@ func (api *api) Start() {
 
 	if api.isAdmin {
 		// Add zone handler
-		http.HandleFunc("/", api.adminHandlerFunc)
+		http.HandleFunc("/ping", api.pingHandlerFunc)
+
+		//http.HandleFunc("/", api.adminHandlerFunc)
 
 	} else {
 
@@ -92,7 +94,7 @@ func (api *api) Start() {
 	log.Fatal(http.ListenAndServe(portHost, nil))
 }
 
-func (api *api) adminHandlerFunc(w http.ResponseWriter, r *http.Request) {
+func (api *api) pingHandlerFunc(w http.ResponseWriter, r *http.Request) {
 	//serve admin index
 	decoder := json.NewDecoder(r.Body)
 
