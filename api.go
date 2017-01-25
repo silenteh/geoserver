@@ -46,6 +46,8 @@ func NewAPI(port string, provider CloudProvider, isAdmin bool, admin *adminPanel
 // Start the API
 func (api *api) Start() {
 
+	http.HandleFunc("/favicon.ico", api.faviconHandlerFunc)
+
 	if api.isAdmin {
 		// Add zone handler
 		http.HandleFunc("/", api.adminHandlerFunc)
@@ -104,6 +106,10 @@ func (api *api) adminHandlerFunc(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(data)
 
+}
+
+func (api *api) faviconHandlerFunc(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotFound)
 }
 
 func (api *api) killHandlerFunc(w http.ResponseWriter, r *http.Request) {
