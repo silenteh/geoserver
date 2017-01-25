@@ -120,7 +120,8 @@ func getVMInfo(provider CloudProvider, z *zone) {
 			log.Printf("Got external VM ip address GEO: %s\n", z.IpAddress)
 		}
 	} else {
-		getZoneInfoFromDataCenter(provider, z.Name, ip)
+		coord := getZoneInfoFromDataCenter(provider, z.Name, ip)
+		z.IpAddress = &coord
 	}
 
 }
