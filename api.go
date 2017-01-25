@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"net"
 	"net/http"
 	"os"
 	"sync"
@@ -32,15 +33,17 @@ type api struct {
 	port          string
 	isAdmin       bool
 	admin         *adminPanel
+	z             *zone
 }
 
 // Create a new API struct
-func NewAPI(port string, provider CloudProvider, isAdmin bool, admin *adminPanel) *api {
+func NewAPI(port string, provider CloudProvider, isAdmin bool, admin *adminPanel, z *zone) *api {
 	return &api{
 		cloudProvider: provider,
 		port:          port,
 		isAdmin:       isAdmin,
 		admin:         admin,
+		z:             z,
 	}
 }
 
@@ -162,13 +165,23 @@ func (api *api) zoneHandlerFunc(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	// serve back the VM info and the client remote IP info
-	if z := getVMData(api.cloudProvider, getIPAdress(r)); z != nil {
-		if data := z.toJson(); len(data) > 0 {
-			w.Write(data)
-			return
-		}
-		log.Println("Error serialize VM information to JSON")
+	host, _, _ := net.SplitHostPort(getIPAdress(r))
+	if host != "" {
+		coord := getIPCoordinates(host)
+		api.z.ClientIpAddress = &coord
+		log.Printf("Got client IP coordinates: %s\n", api.z.ClientIpAddress)
 	}
+
+	// serve the data back
+	if data := api.z.toJson(); len(data) > 0 {
+		w.Write(data)
+		return
+	}
+	log.Println("Error serialize VM information to JSON")
+
+	// if z := getVMData(api.cloudProvider, getIPAdress(r)); z != nil {
+
+	// }
 
 	// otherwise return error
 	w.WriteHeader(http.StatusServiceUnavailable)

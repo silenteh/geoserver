@@ -32,6 +32,11 @@ func main() {
 		port = "8080"
 	}
 
+	// ==============================================================
+	// get VM info
+	z := getVMData(providerId, "")
+	// ==============================================================
+
 	remoteIp := os.Getenv("REMOTE_IP")
 	remotePort := os.Getenv("REMOTE_PORT")
 	interval := os.Getenv("INTERVAL")
@@ -62,7 +67,7 @@ func main() {
 	// ==============================================================
 
 	// New API
-	api := NewAPI(port, providerId, isAdmin, adm)
+	api := NewAPI(port, providerId, isAdmin, adm, z)
 	// Start the API
 	api.Start()
 
