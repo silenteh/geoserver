@@ -56,7 +56,7 @@ func (api *api) Start() {
 		// Add zone handler
 		http.HandleFunc("/ping", api.pingHandlerFunc)
 
-		//http.HandleFunc("/", api.adminHandlerFunc)
+		http.HandleFunc("/", api.adminHandlerFunc)
 
 	} else {
 
@@ -94,7 +94,24 @@ func (api *api) Start() {
 	log.Fatal(http.ListenAndServe(portHost, nil))
 }
 
+func (api *api) adminHandlerFunc(w http.ResponseWriter, r *http.Request) {
+	var vms *[]*zone
+	if err := api.admin.getAll(vms); err != nil {
+		log.Println("Error getting VMs", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	data, _ := json.Marshal(vms)
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(data)
+}
+
 func (api *api) pingHandlerFunc(w http.ResponseWriter, r *http.Request) {
+
+	log.Println("Got heartbeat:", getIPAdress(r))
+
 	//serve admin index
 	decoder := json.NewDecoder(r.Body)
 
@@ -141,6 +158,7 @@ func (api *api) readyHandlerFunc(w http.ResponseWriter, r *http.Request) {
 func (api *api) enableHandlerFunc(w http.ResponseWriter, r *http.Request) {
 	mutex.Lock()
 	isReady = true
+	api.z.Ready = isReady
 	mutex.Unlock()
 	w.WriteHeader(http.StatusOK)
 }
@@ -149,6 +167,7 @@ func (api *api) enableHandlerFunc(w http.ResponseWriter, r *http.Request) {
 func (api *api) disableHandlerFunc(w http.ResponseWriter, r *http.Request) {
 	mutex.Lock()
 	isReady = false
+	api.z.Ready = isReady
 	mutex.Unlock()
 	w.WriteHeader(http.StatusOK)
 }

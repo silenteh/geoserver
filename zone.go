@@ -8,6 +8,7 @@ import (
 	"net"
 	"net/http"
 	"strings"
+	"time"
 )
 
 // Define URLs for gathering cloud provider metadata
@@ -39,6 +40,8 @@ type zone struct {
 	Name            string
 	IpAddress       *coordinates
 	ClientIpAddress *coordinates
+	Ready           bool
+	Timestamp       time.Time
 }
 
 // coordinates information of the ip address

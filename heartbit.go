@@ -77,6 +77,9 @@ func (h *heartbit) ping(url string) {
 
 	if data := h.z.toJson(); len(data) > 0 {
 
+		// set the timestamp
+		h.z.Timestamp = time.Now().UTC()
+
 		req, err := http.NewRequest("POST", url, bytes.NewReader(data))
 		req.Header.Set("Content-Type", "application/json")
 
