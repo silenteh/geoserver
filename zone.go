@@ -160,7 +160,11 @@ func getIPCoordinates(ip string) *coordinates {
 	ipAddressUrl := fmt.Sprintf(geoServiceExternalIPUrl, ip)
 
 	// create request
-	req, _ := http.NewRequest("GET", ipAddressUrl, nil)
+	req, err := http.NewRequest("GET", ipAddressUrl, nil)
+	if err != nil {
+		log.Println("Error building request for getting IP coordinates", ipAddressUrl, err)
+		return coord
+	}
 
 	// add specific CURL user agent header necessary for the api
 	req.Header.Add("User-Agent", "curl/7.49.1")
@@ -169,13 +173,13 @@ func getIPCoordinates(ip string) *coordinates {
 	resp, err := zoneHttpClient.Do(req)
 	if err != nil {
 		// not good...
-		log.Println("Unable to retrieve external GEO IP information:", err)
+		log.Println("Unable to retrieve external GEO IP information:", ipAddressUrl, err)
 	} else {
 		// Parse the response
 		defer resp.Body.Close()
 		enc := json.NewDecoder(resp.Body)
 		if err := enc.Decode(coord); err != nil {
-			log.Println("Failed to parse external GEO ip json response", ipAddressUrl)
+			log.Println("Failed to parse external GEO ip json response", ipAddressUrl, err)
 			return coord
 		}
 		return coord
