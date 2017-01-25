@@ -19,9 +19,10 @@ type heartbit struct {
 	remotePort string
 	interval   int
 	client     http.Client
+	z          *zone
 }
 
-func NewHeartBit(remoteIP, remotePort, interval string) *heartbit {
+func NewHeartBit(remoteIP, remotePort, interval string, z *zone) *heartbit {
 
 	intervalNum := 10
 
@@ -34,6 +35,7 @@ func NewHeartBit(remoteIP, remotePort, interval string) *heartbit {
 		remotePort: remotePort,
 		interval:   intervalNum,
 		client:     http.Client{},
+		z:          z,
 	}
 
 }
@@ -72,20 +74,20 @@ func (h *heartbit) Start() {
 
 func (h *heartbit) ping(url string) {
 	// serve back the VM info and the client remote IP info
-	if z := getVMData(h.provider, ""); z != nil {
-		if data := z.toJson(); len(data) > 0 {
 
-			req, err := http.NewRequest("POST", url, bytes.NewReader(data))
-			req.Header.Set("Content-Type", "application/json")
+	if data := h.z.toJson(); len(data) > 0 {
 
-			resp, err := h.client.Do(req)
-			if err != nil {
-				log.Println("Could not send heartbit", err)
-				log.Println("Response Status:", url, resp.Status)
-			}
-			defer resp.Body.Close()
-			return
+		req, err := http.NewRequest("POST", url, bytes.NewReader(data))
+		req.Header.Set("Content-Type", "application/json")
+
+		resp, err := h.client.Do(req)
+		if err != nil {
+			log.Println("Could not send heartbit", err)
+			log.Println("Response Status:", url, resp.Status)
 		}
-		log.Println("Error serialize VM information to JSON")
+		defer resp.Body.Close()
+		return
 	}
+	log.Println("Error serialize VM information to JSON")
+
 }

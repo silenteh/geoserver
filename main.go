@@ -60,7 +60,7 @@ func main() {
 
 	} else {
 		// Heartbit
-		h := NewHeartBit(remoteIp, remotePort, interval)
+		h := NewHeartBit(remoteIp, remotePort, interval, z)
 		h.Start()
 	}
 
