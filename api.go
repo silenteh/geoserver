@@ -31,16 +31,18 @@ var (
 type api struct {
 	cloudProvider CloudProvider
 	port          string
+	host          string
 	isAdmin       bool
 	admin         *adminPanel
 	z             *zone
 }
 
 // Create a new API struct
-func NewAPI(port string, provider CloudProvider, isAdmin bool, admin *adminPanel, z *zone) *api {
+func NewAPI(host, port string, provider CloudProvider, isAdmin bool, admin *adminPanel, z *zone) *api {
 	return &api{
 		cloudProvider: provider,
 		port:          port,
+		host:          host,
 		isAdmin:       isAdmin,
 		admin:         admin,
 		z:             z,
@@ -81,7 +83,7 @@ func (api *api) Start() {
 	}
 
 	// start the HTTP server
-	portHost := fmt.Sprintf(":%s", api.port)
+	portHost := fmt.Sprintf("%s:%s", api.host, api.port)
 
 	// show the vars
 	if api.isAdmin {

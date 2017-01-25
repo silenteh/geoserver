@@ -20,6 +20,7 @@ func main() {
 
 	// HTTP port
 	port := os.Getenv("PORT")
+	host := os.Getenv("HOST")
 
 	// check in case the provider is not GCE
 	switch provider {
@@ -30,6 +31,10 @@ func main() {
 	// if the port is emoty then set it to 8080
 	if port == "" {
 		port = "8080"
+	}
+
+	if host == "" {
+		host = "0.0.0.0"
 	}
 
 	// ==============================================================
@@ -67,7 +72,7 @@ func main() {
 	// ==============================================================
 
 	// New API
-	api := NewAPI(port, providerId, isAdmin, adm, z)
+	api := NewAPI(host, port, providerId, isAdmin, adm, z)
 	// Start the API
 	api.Start()
 
