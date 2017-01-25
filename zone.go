@@ -7,6 +7,7 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"strings"
 )
 
 // Define URLs for gathering cloud provider metadata
@@ -104,18 +105,23 @@ func getVMInfo(provider CloudProvider, z *zone) {
 		break
 	}
 
+	// get the zone information
+	z.Name = getZoneInfo(provider, zoneUrl)
+
 	// gathers the external ip assigned to the VM
 	ip := getExternalIP(provider, publicIPUrl)
 	log.Println("Got external VM ip address", ip)
-	if ip != "" {
-		// Resolves the geo location info
-		coord := getIPCoordinates(ip)
-		z.IpAddress = &coord
-		log.Printf("Got external VM ip address GEO: %s\n", z.IpAddress)
-	}
 
-	// get the zone information
-	z.Name = getZoneInfo(provider, zoneUrl)
+	if provider == AWS {
+		if ip != "" {
+			// Resolves the geo location info
+			coord := getIPCoordinates(ip)
+			z.IpAddress = &coord
+			log.Printf("Got external VM ip address GEO: %s\n", z.IpAddress)
+		}
+	} else {
+		getZoneInfoFromDataCenter(provider, z.Name, ip)
+	}
 
 }
 
@@ -236,4 +242,83 @@ func getZoneInfo(provider CloudProvider, url string) string {
 
 	log.Println("Failed to get VM zone information", url)
 	return zoneInfo
+}
+
+func getZoneInfoFromDataCenter(provider CloudProvider, zone, ip string) coordinates {
+
+	// switch provider {
+	// case GCE:
+	// 	return getGCEZone(zone, ip)
+	// }
+
+	return getGCEZone(zone, ip)
+
+}
+
+func getGCEZone(zone, ip string) coordinates {
+
+	if strings.Contains(zone, "europe-west1") {
+		// Rue de Ghlin 100, 7331 Saint-Ghislain, Belgium
+		return coordinates{
+			Ip:      ip,
+			City:    "Saint-Ghislain",
+			Country: "Belgium",
+			Region:  "Ghlin",
+			LatLong: "50.470976, 3.864521",
+		}
+	} else if strings.Contains(zone, "us-west1") {
+		return coordinates{
+			Ip:      ip,
+			City:    "The Dalles",
+			Country: "USA",
+			Region:  "Oregon",
+			LatLong: "45.632130, -121.200992",
+		}
+
+	} else if strings.Contains(zone, "us-central1") {
+		return coordinates{
+			Ip:      ip,
+			City:    "Council Bluffs",
+			Country: "USA",
+			Region:  "Iowa",
+			LatLong: "41.221099, -95.863942",
+		}
+
+	} else if strings.Contains(zone, "us-east1") {
+		return coordinates{
+			Ip:      ip,
+			City:    "Berkeley County",
+			Country: "USA",
+			Region:  "South Carolina",
+			LatLong: "33.072657, -80.038877",
+		}
+
+	} else if strings.Contains(zone, "asia-east1") {
+		return coordinates{
+			Ip:      ip,
+			City:    "Changhua County",
+			Country: "Taiwan",
+			Region:  "",
+			LatLong: "23.925895, 120.441405",
+		}
+
+	} else if strings.Contains(zone, "asia-northeast1") {
+
+		return coordinates{
+			Ip:      ip,
+			City:    "Tokyo",
+			Country: "Japan",
+			Region:  "",
+			LatLong: "35.648112, 139.790766",
+		}
+	}
+
+	return coordinates{
+		Ip:      ip,
+		City:    "Unknown",
+		Country: "Unknown",
+		Region:  "Unknown",
+		LatLong: "0, 0",
+	}
+
 }
