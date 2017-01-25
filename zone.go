@@ -85,9 +85,9 @@ func (z *zone) toJson() []byte {
 }
 
 func ZoneFromJson(data []byte) (*zone, error) {
-	var z *zone
-	err := json.Unmarshal(data, z)
-	return z, err
+	var z zone
+	err := json.Unmarshal(data, &z)
+	return &z, err
 
 }
 
