@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"net"
 	"net/http"
 )
 
@@ -57,7 +58,9 @@ func getVMData(provider CloudProvider, clientIp string) *zone {
 	getVMInfo(provider, &z)
 
 	if clientIp != "" {
-		z.ClientIpAddress = getIPCoordinates(clientIp)
+		// split /host /port
+		host, _, _ := net.SplitHostPort(clientIp)
+		z.ClientIpAddress = getIPCoordinates(host)
 	}
 
 	return &z
@@ -139,7 +142,7 @@ func getExternalIP(provider CloudProvider, url string) string {
 		}
 	}
 
-	log.Println("Failed to get external IP", url)
+	log.Println("Failed to get external IP", url, err)
 	return ip
 
 }
