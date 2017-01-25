@@ -92,6 +92,9 @@ func (api *api) Start() {
 		log.Println("HTTP listening on:", portHost, "for provider", api.cloudProvider)
 	}
 
+	// set the zone as ready
+	api.z.Ready = isReady
+
 	// socket listening
 	log.Fatal(http.ListenAndServe(portHost, nil))
 }
