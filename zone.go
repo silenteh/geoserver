@@ -187,11 +187,15 @@ func getIPCoordinates(ip string) coordinates {
 		// Parse the response
 		defer resp.Body.Close()
 		if resp.StatusCode == 200 {
-			enc := json.NewDecoder(resp.Body)
-			if err := enc.Decode(&coord); err != nil {
-				log.Println("Failed to parse external GEO ip json response", ipAddressUrl, err)
-				return coord
+			bodyBytes, err := ioutil.ReadAll(resp.Body)
+			if err == nil {
+				log.Println("GEO string", string(bodyBytes))
 			}
+			// enc := json.NewDecoder(resp.Body)
+			// if err := enc.Decode(&coord); err != nil {
+			// 	log.Println("Failed to parse external GEO ip json response", ipAddressUrl, err)
+			// 	return coord
+			// }
 		} else {
 			log.Println("IP Coordinates service: got", resp.StatusCode, "status code")
 		}
