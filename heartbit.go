@@ -84,9 +84,11 @@ func (h *heartbit) ping(url string) {
 		req.Header.Set("Content-Type", "application/json")
 
 		resp, err := h.client.Do(req)
-		if err != nil {
-			log.Println("Could not send heartbit", err)
+		if err == nil {
+			//
 			log.Println("Response Status:", url, resp.Status)
+		} else {
+			log.Println("Could not send heartbit", err)
 		}
 		defer resp.Body.Close()
 		return
