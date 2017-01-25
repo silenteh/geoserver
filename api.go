@@ -79,7 +79,11 @@ func (api *api) Start() {
 	portHost := fmt.Sprintf(":%s", api.port)
 
 	// show the vars
-	log.Println("HTTP listening on:", portHost, "for provider", api.cloudProvider)
+	if api.isAdmin {
+		log.Println("Admin mode - HTTP listening on:", portHost, "for provider", api.cloudProvider)
+	} else {
+		log.Println("HTTP listening on:", portHost, "for provider", api.cloudProvider)
+	}
 
 	// socket listening
 	log.Fatal(http.ListenAndServe(portHost, nil))
