@@ -61,6 +61,7 @@ func getVMData(provider CloudProvider, clientIp string) *zone {
 		// split /host /port
 		host, _, _ := net.SplitHostPort(clientIp)
 		z.ClientIpAddress = getIPCoordinates(host)
+		log.Printf("Got client IP coordinates: %s\n", z.ClientIpAddress)
 	}
 
 	return &z
@@ -104,9 +105,11 @@ func getVMInfo(provider CloudProvider, z *zone) {
 
 	// gathers the external ip assigned to the VM
 	ip := getExternalIP(provider, publicIPUrl)
+	log.Println("Got external VM ip address", ip)
 	if ip != "" {
 		// Resolves the geo location info
 		z.IpAddress = getIPCoordinates(ip)
+		log.Printf("Got external VM ip address GEO: %s\n", z.IpAddress)
 	}
 
 	// get the zone information
