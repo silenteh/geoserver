@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"sync"
 )
 
@@ -113,7 +114,8 @@ func (api *api) faviconHandlerFunc(w http.ResponseWriter, r *http.Request) {
 }
 
 func (api *api) killHandlerFunc(w http.ResponseWriter, r *http.Request) {
-	log.Panic("Used KILL SWITCH")
+	log.Println("Used KILL SWITCH")
+	os.Exit(1)
 }
 
 // checks whether the service is up and runnning
