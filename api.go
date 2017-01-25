@@ -114,11 +114,16 @@ func (api *api) pingHandlerFunc(w http.ResponseWriter, r *http.Request) {
 
 	log.Println("Got heartbeat:", getIPAdress(r))
 
+	if r.Body == nil {
+		http.Error(w, "Missing request body", 400)
+		return
+	}
+
 	//serve admin index
 	decoder := json.NewDecoder(r.Body)
 
-	var z *zone
-	err := decoder.Decode(z)
+	var z zone
+	err := decoder.Decode(&z)
 
 	if err != nil {
 		log.Println("Could not deserialize zone", err)
@@ -127,7 +132,7 @@ func (api *api) pingHandlerFunc(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// update in botldb
-	if err := api.admin.ping(z); err != nil {
+	if err := api.admin.ping(&z); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
