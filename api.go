@@ -9,6 +9,8 @@ import (
 	"os"
 	"sync"
 	"time"
+
+	"html/template"
 )
 
 // Defines the currently supported cloud providers
@@ -59,12 +61,17 @@ func (api *api) Start() {
 		// Add zone handler
 		http.HandleFunc("/ping", api.pingHandlerFunc)
 
-		http.HandleFunc("/", api.adminHandlerFunc)
+		http.HandleFunc("/", api.adminIndexHandlerFunc)
+
+		http.HandleFunc("/services", api.adminHandlerFunc)
 
 	} else {
 
 		// Add zone handler
-		http.HandleFunc("/", api.zoneHandlerFunc)
+		http.HandleFunc("/", api.zoneIndexHandlerFunc)
+
+		// Service to get the data
+		http.HandleFunc("/location", api.zoneHandlerFunc)
 
 		// used for signaling that the conatiner is up and running
 		http.HandleFunc("/live", api.liveHandlerFunc)
@@ -98,6 +105,22 @@ func (api *api) Start() {
 
 	// socket listening
 	log.Fatal(http.ListenAndServe(portHost, nil))
+}
+
+func (api *api) adminIndexHandlerFunc(w http.ResponseWriter, r *http.Request) {
+	t, err := template.ParseFiles("templates/admin.html")
+	if err != nil {
+		log.Fatal("Error parsing admin template files ", err)
+	}
+	t.Execute(w, nil)
+}
+
+func (api *api) zoneIndexHandlerFunc(w http.ResponseWriter, r *http.Request) {
+	t, err := template.ParseFiles("templates/index.html")
+	if err != nil {
+		log.Fatal("Error parsing admin template files ", err)
+	}
+	t.Execute(w, nil)
 }
 
 func (api *api) adminHandlerFunc(w http.ResponseWriter, r *http.Request) {
